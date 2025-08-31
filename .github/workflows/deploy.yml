@@ -1,24 +1,20 @@
-name: Deploy API
+name: Deploy (CDK + CodeDeploy)
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [ "main", "dev" ]
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
+  deploy-infra:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write   # required for OIDC
-      contents: read    # required for actions/checkout
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials via OIDC
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::412381746256:role/githubAccessECRECSRole
@@ -29,16 +25,49 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install CDK deps
+        working-directory: cdk
+        run: |
+          npm ci
+          npx cdk bootstrap
+          npx cdk deploy --require-approval never Ec2DynamoCognitoApiStack
+
+  deploy-app:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::412381746256:role/githubAccessECRECSRole
+          aws-region: ap-southeast-2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install deps
         run: npm ci
 
-      - name: CDK Bootstrap (if needed)
-        run: npx cdk bootstrap aws://412381746256/ap-southeast-2
+      - name: Package bundle
+        run: zip -r deploy.zip src package.json package-lock.json appspec.yml scripts
 
-      - name: Deploy to AWS with CDK
+      - name: Upload to S3 (artifact bucket you own)
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            npx cdk deploy --require-approval never --all -c stage=prod
-          else
-            npx cdk deploy --require-approval never --all -c stage=dev
-          fi
+          BUCKET=your-codedeploy-artifacts-bucket
+          APP=Ec2NodeApiApp
+          KEY=bundles/${GITHUB_SHA}.zip
+          aws s3 cp deploy.zip s3://$BUCKET/$KEY
+          echo "B=$BUCKET" >> $GITHUB_ENV
+          echo "K=$KEY" >> $GITHUB_ENV
+
+      - name: Trigger CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name Ec2NodeApiApp \
+            --deployment-group-name Ec2NodeApiDg \
+            --deployment-config-name CodeDeployDefault.HalfAtATime \
+            --s3-location bucket=${{ env.B }},key=${{ env.K }},bundleType=zip
