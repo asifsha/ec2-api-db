@@ -102,12 +102,16 @@ class InfraStack extends cdk.Stack {
     });
 
     // Rolling update (additional batch style)
-    autoScalingGroup.applyUpdatePolicy(cdk.aws_autoscaling.UpdatePolicy.rollingUpdate({
-      minInstancesInService: 1,
-      maxBatchSize: 1,
-      pauseTime: cdk.Duration.minutes(1),
-      waitOnResourceSignals: false
-    }));
+    // autoScalingGroup.applyUpdatePolicy(cdk.aws_autoscaling.UpdatePolicy.rollingUpdate({
+    //   minInstancesInService: 1,
+    //   maxBatchSize: 1,
+    //   pauseTime: cdk.Duration.minutes(1),
+    //   waitOnResourceSignals: false
+    // }));
+
+    autoScalingGroup.scaleOnCpuUtilization("CpuScaling", {
+      targetUtilizationPercent: 70
+    });
 
     // ALB
     const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
