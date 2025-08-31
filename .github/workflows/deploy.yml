@@ -33,7 +33,7 @@ jobs:
       - name: Install CDK deps
         working-directory: cdk
         run: |
-          npm ci
+          npm install
           npx cdk bootstrap
           npx cdk deploy --require-approval never Ec2DynamoCognitoApiStack
 
