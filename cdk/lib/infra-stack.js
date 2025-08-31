@@ -17,6 +17,12 @@ class InfraStack extends cdk.Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
+    const artifactBucket = new s3.Bucket(this, "CodeDeployArtifactsBucket", {
+      versioned: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // ⚠️ only for dev/test
+      autoDeleteObjects: true
+    });
+
     const region = cdk.Stack.of(this).region;
 
     // DynamoDB (on-demand = minimal cost)
@@ -150,6 +156,9 @@ class InfraStack extends cdk.Stack {
     new cdk.CfnOutput(this, "UserPoolId", { value: userPool.userPoolId });
     new cdk.CfnOutput(this, "UserPoolClientId", { value: userPoolClient.userPoolClientId });
     new cdk.CfnOutput(this, "TableName", { value: table.tableName });
+    new cdk.CfnOutput(this, "ArtifactBucketName", {
+      value: artifactBucket.bucketName
+    });
   }
 }
 
