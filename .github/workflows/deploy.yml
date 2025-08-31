@@ -25,6 +25,11 @@ jobs:
         with:
           node-version: 18
 
+      - name: Set CDK Env
+        run: |
+          echo "CDK_DEFAULT_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
+          echo "CDK_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
+
       - name: Install CDK deps
         working-directory: cdk
         run: |
