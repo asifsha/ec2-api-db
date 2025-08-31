@@ -1,3 +1,10 @@
 {
-  "app": "node cdk/bin/app.js"
+  "app": "node cdk/bin/app.js",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true,
+    "aws-cdk:enableDiffNoFail": "true",
+    "acknowledged-issues": ["34892"],
+    "aws:cdk:default-account": "412381746256",
+    "aws:cdk:default-region": "ap-southeast-2"
+  }
 }
