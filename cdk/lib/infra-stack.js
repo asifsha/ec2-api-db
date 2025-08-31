@@ -6,6 +6,7 @@ const iam = require("aws-cdk-lib/aws-iam");
 const dynamodb = require("aws-cdk-lib/aws-dynamodb");
 const cognito = require("aws-cdk-lib/aws-cognito");
 const codedeploy = require("aws-cdk-lib/aws-codedeploy");
+const s3 = require("aws-cdk-lib/aws-s3");
 const { Construct } = require("constructs");
 
 class InfraStack extends cdk.Stack {
