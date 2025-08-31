@@ -1,0 +1,41 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+# package-lock.json
+.pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+*.out
+*.err
+
+# AWS CDK
+cdk.out/
+cdk.context.json
+
+# AWS SAM / CloudFormation
+*.template.json
+*.template.yaml
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+
+# OS files
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+coverage/
