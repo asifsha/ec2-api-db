@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 // Public health
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "ec2-dynamo-cognito-api", ts: new Date().toISOString() });
+  res.json({ status: "ok", service: "ec2-api-db", ts: new Date().toISOString() });
 });
 
 // All /items routes require Cognito JWT
