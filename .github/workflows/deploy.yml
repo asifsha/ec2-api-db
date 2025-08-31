@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload to S3 (artifact bucket you own)
         run: |
-          BUCKET=your-codedeploy-artifacts-bucket
+          BUCKET=ec2dynamocognitoapistack-codedeployartifactsbucket-xfw1tgdlbmtj
           APP=Ec2NodeApiApp
           KEY=bundles/${GITHUB_SHA}.zip
           aws s3 cp deploy.zip s3://$BUCKET/$KEY
