@@ -30,12 +30,12 @@ jobs:
           echo "CDK_DEFAULT_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
           echo "CDK_DEFAULT_REGION=ap-southeast-2" >> $GITHUB_ENV
 
-      - name: Install CDK deps
-        working-directory: cdk
-        run: |
-          npm ci
-          npx cdk bootstrap
-          npx cdk deploy --require-approval never Ec2DynamoCognitoApiStack
+      # - name: Install CDK deps
+      #   working-directory: cdk
+      #   run: |
+      #     npm ci
+      #     npx cdk bootstrap
+      #     npx cdk deploy --require-approval never Ec2DynamoCognitoApiStack
 
   deploy-app:
     needs: deploy-infra
@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload to S3 (artifact bucket you own)
         run: |
-          BUCKET=ec2dynamocognitoapistack-codedeployartifactsbucket-xfw1tgdlbmtj
+          BUCKET=ec2dynamocognitoapistack-codedeployartifactsbucket-7tixworyf6bz  
           APP=Ec2NodeApiApp
           KEY=bundles/${GITHUB_SHA}.zip
           aws s3 cp deploy.zip s3://$BUCKET/$KEY

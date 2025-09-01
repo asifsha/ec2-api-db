@@ -27,3 +27,4 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+ec2-keypair.pem

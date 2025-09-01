@@ -99,13 +99,23 @@ class InfraStack extends cdk.Stack {
       userData
     });
 
+
+    role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
+    );
+
     // ASG (desired=2, max=3)
     const autoScalingGroup = new asg.AutoScalingGroup(this, "ApiAsg", {
       vpc,
       minCapacity: 1,
       desiredCapacity: 2,
       maxCapacity: 3,
-      launchTemplate: lt
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
+      role,
+      securityGroup: appSg,
+      userData,
+      keyName: "ec2-keypair"
     });
 
     // Rolling update (additional batch style)
