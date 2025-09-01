@@ -58,7 +58,12 @@ class InfraStack extends cdk.Stack {
     const role = new iam.Role(this, "InstanceRole", {
       assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com")
     });
-    role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"));
+    role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
+    );
+    role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2RoleforAWSCodeDeploy")
+    );
     table.grantWriteData(role);
 
     // CodeDeploy permissions (broad for sample; narrow in prod)
@@ -69,12 +74,13 @@ class InfraStack extends cdk.Stack {
     });
 
     // User data: install CodeDeploy agent, Node.js, seed env
+    // User data: install CodeDeploy agent, Node.js, seed env
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
       "set -ex",
       "dnf install -y ruby wget",
       `cd /home/ec2-user`,
-      `wget https://aws-codedeploy-${region}.s3.${region}.amazonaws.com/latest/install`,
+      `wget https://aws-codedeploy-${region}.s3.${region}.amazonaws.com/latest/install -O install`,
       "chmod +x ./install && ./install auto",
       "systemctl enable codedeploy-agent && systemctl start codedeploy-agent",
       "curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -",
@@ -83,11 +89,7 @@ class InfraStack extends cdk.Stack {
       `echo "TABLE_NAME=${table.tableName}" >> /etc/environment`,
       `echo "USER_POOL_ID=${userPool.userPoolId}" >> /etc/environment`,
       `echo "COGNITO_CLIENT_ID=${userPoolClient.userPoolClientId}" >> /etc/environment`,
-      `echo "AWS_REGION=${region}" >> /etc/environment`,
-      "export TABLE_NAME=$(grep TABLE_NAME /etc/environment | cut -d= -f2)",
-      "export USER_POOL_ID=$(grep USER_POOL_ID /etc/environment | cut -d= -f2)",
-      "export COGNITO_CLIENT_ID=$(grep COGNITO_CLIENT_ID /etc/environment | cut -d= -f2)",
-      "export AWS_REGION=$(grep AWS_REGION /etc/environment | cut -d= -f2)"
+      `echo "AWS_REGION=${region}" >> /etc/environment`
     );
 
     // Launch template
@@ -118,19 +120,11 @@ class InfraStack extends cdk.Stack {
       keyName: "ec2-keypair"
     });
 
-    // Rolling update (additional batch style)
-    // autoScalingGroup.applyUpdatePolicy(cdk.aws_autoscaling.UpdatePolicy.rollingUpdate({
-    //   minInstancesInService: 1,
-    //   maxBatchSize: 1,
-    //   pauseTime: cdk.Duration.minutes(1),
-    //   waitOnResourceSignals: false
-    // }));
-
     autoScalingGroup.scaleOnCpuUtilization("CpuScaling", {
       targetUtilizationPercent: 70
     });
 
-    // ALB
+    // ALB + Target Group
     const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
       vpc,
       internetFacing: true,
@@ -167,9 +161,7 @@ class InfraStack extends cdk.Stack {
     new cdk.CfnOutput(this, "UserPoolId", { value: userPool.userPoolId });
     new cdk.CfnOutput(this, "UserPoolClientId", { value: userPoolClient.userPoolClientId });
     new cdk.CfnOutput(this, "TableName", { value: table.tableName });
-    new cdk.CfnOutput(this, "ArtifactBucketName", {
-      value: artifactBucket.bucketName
-    });
+    new cdk.CfnOutput(this, "ArtifactBucketName", { value: artifactBucket.bucketName });
   }
 }
 

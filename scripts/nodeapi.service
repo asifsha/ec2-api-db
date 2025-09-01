@@ -1,0 +1,13 @@
+[Unit]
+Description=Node API Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/app/src/index.js
+WorkingDirectory=/opt/app
+Restart=always
+EnvironmentFile=/etc/environment
+User=ec2-user
+
+[Install]
+WantedBy=multi-user.target
