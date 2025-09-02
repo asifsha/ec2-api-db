@@ -30,6 +30,14 @@ jobs:
           echo "CDK_DEFAULT_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
           echo "CDK_DEFAULT_REGION=ap-southeast-2" >> $GITHUB_ENV
 
+      - name: Debug env
+        run: |
+          echo "CDK_DEFAULT_ACCOUNT=$CDK_DEFAULT_ACCOUNT"
+          echo "CDK_DEFAULT_REGION=$CDK_DEFAULT_REGION"
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ env.CDK_DEFAULT_ACCOUNT }}
+          CDK_DEFAULT_REGION: ${{ env.CDK_DEFAULT_REGION }}
+
       - name: Install CDK deps
         working-directory: cdk
         env:
