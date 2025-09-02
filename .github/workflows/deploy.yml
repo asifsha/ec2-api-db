@@ -71,10 +71,13 @@ jobs:
       - name: Package bundle
         run: zip -r deploy.zip src package.json package-lock.json appspec.yml scripts
 
-      - name: Get CDK output
+      - name: Get S3 bucket name from CloudFormation outputs
         id: bucket
         run: |
-          BUCKET=$(cdk output MyStack:ArtifactBucketName)
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name MyStack \
+            --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" \
+            --output text)
           echo "bucket_name=$BUCKET" >> $GITHUB_ENV
 
       - name: Upload to S3 (artifact bucket you own)
