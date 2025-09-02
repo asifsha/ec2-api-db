@@ -71,9 +71,14 @@ jobs:
       - name: Package bundle
         run: zip -r deploy.zip src package.json package-lock.json appspec.yml scripts
 
-      - name: Upload to S3 (artifact bucket you own)
+      - name: Get CDK output
+        id: bucket
         run: |
-          BUCKET=ec2dynamocognitoapistack-codedeployartifactsbucket-7tixworyf6bz  
+          BUCKET=$(cdk output MyStack:ArtifactBucketName)
+          echo "bucket_name=$BUCKET" >> $GITHUB_ENV
+
+      - name: Upload to S3 (artifact bucket you own)
+        run: | 
           APP=Ec2NodeApiApp
           KEY=bundles/${GITHUB_SHA}.zip
           aws s3 cp deploy.zip s3://$BUCKET/$KEY
