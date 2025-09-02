@@ -62,12 +62,14 @@ class InfraStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
     );
     role.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2RoleforAWSCodeDeployLimited")
+      iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforAWSCodeDeployLimited")
     );
-    table.grantWriteData(role);
+    
 
     // CodeDeploy permissions (broad for sample; narrow in prod)
     role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployFullAccess"));
+
+    table.grantWriteData(role);
 
     const instanceProfile = new iam.CfnInstanceProfile(this, "InstanceProfile", {
       roles: [role.roleName]
