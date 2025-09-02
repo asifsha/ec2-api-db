@@ -32,6 +32,9 @@ jobs:
 
       - name: Install CDK deps
         working-directory: cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ env.CDK_DEFAULT_ACCOUNT }}
+          CDK_DEFAULT_REGION: ${{ env.CDK_DEFAULT_REGION }}
         run: |
           npm ci
           npx cdk bootstrap
