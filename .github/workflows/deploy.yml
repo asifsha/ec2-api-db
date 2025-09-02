@@ -76,7 +76,7 @@ jobs:
         run: |
           BUCKET=$(aws cloudformation describe-stacks \
             --stack-name Ec2DynamoCognitoApiStack \
-            --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" \
+            --query "Stacks[0].Outputs[?OutputKey=='ArtifactBucketName'].OutputValue" \
             --output text)
           echo "bucket_name=$BUCKET" >> $GITHUB_ENV
 
