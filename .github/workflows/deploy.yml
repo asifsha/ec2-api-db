@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   deploy-infra:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +51,8 @@ jobs:
   deploy-app:
     needs: deploy-infra
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-southeast-2
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +60,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::412381746256:role/githubAccessECRECSRole
-          aws-region: ap-southeast-2
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -71,10 +73,18 @@ jobs:
       - name: Package bundle
         run: zip -r deploy.zip src package.json package-lock.json appspec.yml scripts
 
+      
+      - name: Debug AWS identity & region
+        run: |
+          aws sts get-caller-identity
+          aws configure list
+          aws cloudformation describe-stacks --region $AWS_REGION
+
       - name: Get S3 bucket name from CloudFormation outputs
         id: bucket
         run: |
           BUCKET=$(aws cloudformation describe-stacks \
+            --region $AWS_REGION \
             --stack-name Ec2DynamoCognitoApiStack \
             --query "Stacks[0].Outputs[?OutputKey=='ArtifactBucketName'].OutputValue" \
             --output text)
