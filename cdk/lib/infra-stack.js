@@ -61,15 +61,25 @@ class InfraStack extends cdk.Stack {
     role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
     );
-    role.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforAWSCodeDeployLimited")
-    );
-    
+    // role.addManagedPolicy(
+    //   iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforAWSCodeDeployLimited")
+    // );
+
 
     // CodeDeploy permissions (broad for sample; narrow in prod)
-    role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployFullAccess"));
+    // role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployFullAccess"));
 
     artifactBucket.grantRead(role);
+    artifactBucket.grantReadWrite(role);
+
+    artifactBucket.addToResourcePolicy(new iam.PolicyStatement({
+      actions: ["s3:GetObject", "s3:ListBucket"],
+      resources: [
+        artifactBucket.bucketArn,
+        `${artifactBucket.bucketArn}/*`
+      ],
+      principals: [new iam.ArnPrincipal(role.roleArn)]
+    }));
 
     table.grantWriteData(role);
 
@@ -104,11 +114,6 @@ class InfraStack extends cdk.Stack {
       securityGroup: appSg,
       userData
     });
-
-
-    role.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
-    );
 
     // ASG (desired=2, max=3)
     const autoScalingGroup = new asg.AutoScalingGroup(this, "ApiAsg", {
