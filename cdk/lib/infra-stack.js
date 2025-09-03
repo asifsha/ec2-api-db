@@ -69,7 +69,6 @@ class InfraStack extends cdk.Stack {
     // CodeDeploy permissions (broad for sample; narrow in prod)
     // role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployFullAccess"));
 
-    artifactBucket.grantRead(role);
     artifactBucket.grantReadWrite(role);
 
     artifactBucket.addToResourcePolicy(new iam.PolicyStatement({
