@@ -88,7 +88,7 @@ jobs:
             --stack-name Ec2DynamoCognitoApiStack \
             --query "Stacks[0].Outputs[?OutputKey=='ArtifactBucketName'].OutputValue" \
             --output text)
-          echo "bucket_name=$BUCKET" >> $GITHUB_ENV
+          echo "BUCKET=$BUCKET" >> $GITHUB_ENV
 
       - name: Upload to S3 (artifact bucket you own)
         run: | 
