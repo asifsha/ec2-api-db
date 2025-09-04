@@ -117,7 +117,7 @@ class InfraStack extends cdk.Stack {
     // ASG (desired=2, max=3)
     const autoScalingGroup = new asg.AutoScalingGroup(this, "ApiAsg", {
       vpc,
-      minCapacity: 1,
+      minCapacity: 2,
       desiredCapacity: 2,
       maxCapacity: 3,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
