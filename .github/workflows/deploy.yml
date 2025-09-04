@@ -105,3 +105,18 @@ jobs:
             --deployment-group-name Ec2NodeApiDg \
             --deployment-config-name CodeDeployDefault.HalfAtATime \
             --s3-location bucket=${{ env.B }},key=${{ env.K }},bundleType=zip
+
+      - name: Start CodeDeploy deployment
+        id: deploy
+        run: |
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name Ec2NodeApiApp \
+            --deployment-group-name Ec2NodeApiDg \
+            --s3-location bucket=$BUCKET,key=$KEY,bundleType=zip \
+            --output text --query "deploymentId")
+
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
+
+      - name: Wait for deployment
+        run: |
+          aws deploy wait deployment-successful --deployment-id ${{ env.deployment_id }}
