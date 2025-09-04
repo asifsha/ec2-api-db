@@ -161,7 +161,7 @@ class InfraStack extends cdk.Stack {
       autoScalingGroups: [autoScalingGroup],
       installAgent: false, // installed in userData
       loadBalancer: codedeploy.LoadBalancer.application(targetGroup),
-      deploymentConfig: codedeploy.ServerDeploymentConfig.HALF_AT_A_TIME // safe default
+      deploymentConfig: codedeploy.ServerDeploymentConfig.ALL_AT_ONCE // safe default
     });
 
     // Outputs
