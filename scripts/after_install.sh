@@ -26,7 +26,7 @@ WorkingDirectory=/opt/app
 ExecStart=/usr/bin/node src/app.js
 Restart=always
 RestartSec=3
-User=root
+User=ec2-user
 
 [Install]
 WantedBy=multi-user.target
