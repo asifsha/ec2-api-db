@@ -95,8 +95,7 @@ jobs:
           APP=Ec2NodeApiApp
           KEY=bundles/${GITHUB_SHA}.zip
           aws s3 cp deploy.zip s3://$BUCKET/$KEY
-          echo "B=$BUCKET" >> $GITHUB_ENV
-          echo "K=$KEY" >> $GITHUB_ENV
+          echo "KEY=$KEY" >> $GITHUB_ENV
 
       - name: Debug bucket/key
         run: |
@@ -105,18 +104,15 @@ jobs:
 
 
       - name: Create CodeDeploy deployment
-        id: codedeploy
         run: |
           DEPLOYMENT_ID=$(aws deploy create-deployment \
             --application-name Ec2NodeApiApp \
             --deployment-group-name Ec2NodeApiDg \
-            --deployment-config-name CodeDeployDefault.HalfAtATime \
-            --s3-location bucket=${{ env.BUCKET }},key=${{ env.KEY }},bundleType=zip
+            --s3-location bucket=${{ env.BUCKET }},key=${{ env.KEY }},bundleType=zip \
             --query "deploymentId" \
             --output text)
           echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
 
-
       - name: Wait for deployment to succeed
         run: |
-          aws deploy wait deployment-successful --deployment-id $DEPLOYMENT_ID
+          aws deploy wait deployment-successful --deployment-id ${{ env.DEPLOYMENT_ID }}
