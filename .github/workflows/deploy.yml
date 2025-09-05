@@ -98,6 +98,12 @@ jobs:
           echo "B=$BUCKET" >> $GITHUB_ENV
           echo "K=$KEY" >> $GITHUB_ENV
 
+      - name: Debug bucket/key
+        run: |
+          echo "BUCKET=$BUCKET"
+          echo "KEY=$KEY"
+
+
       - name: Create CodeDeploy deployment
         id: codedeploy
         run: |
@@ -109,6 +115,7 @@ jobs:
             --query "deploymentId" \
             --output text)
           echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
+
 
       - name: Wait for deployment to succeed
         run: |
