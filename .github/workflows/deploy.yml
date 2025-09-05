@@ -100,8 +100,8 @@ jobs:
 
       - name: Debug bucket/key
         run: |
-          echo "BUCKET=$BUCKET"
-          echo "KEY=$KEY"
+          echo "BUCKET=${{ env.BUCKET }}"
+          echo "KEY=${{ env.KEY }}"
 
 
       - name: Create CodeDeploy deployment
@@ -111,7 +111,7 @@ jobs:
             --application-name Ec2NodeApiApp \
             --deployment-group-name Ec2NodeApiDg \
             --deployment-config-name CodeDeployDefault.HalfAtATime \
-            --s3-location "bucket=$BUCKET,key=$KEY,bundleType=zip" \
+            --s3-location bucket=${{ env.BUCKET }},key=${{ env.KEY }},bundleType=zip
             --query "deploymentId" \
             --output text)
           echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
