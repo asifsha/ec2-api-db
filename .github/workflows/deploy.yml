@@ -98,25 +98,18 @@ jobs:
           echo "B=$BUCKET" >> $GITHUB_ENV
           echo "K=$KEY" >> $GITHUB_ENV
 
-      - name: Trigger CodeDeploy
-        run: |
-          aws deploy create-deployment \
-            --application-name Ec2NodeApiApp \
-            --deployment-group-name Ec2NodeApiDg \
-            --deployment-config-name CodeDeployDefault.HalfAtATime \
-            --s3-location bucket=${{ env.B }},key=${{ env.K }},bundleType=zip
-
-      - name: Start CodeDeploy deployment
-        id: deploy
+      - name: Create CodeDeploy deployment
+        id: codedeploy
         run: |
           DEPLOYMENT_ID=$(aws deploy create-deployment \
             --application-name Ec2NodeApiApp \
             --deployment-group-name Ec2NodeApiDg \
+            --deployment-config-name CodeDeployDefault.HalfAtATime \
             --s3-location bucket=$BUCKET,key=$KEY,bundleType=zip \
-            --output text --query "deploymentId")
+            --query "deploymentId" \
+            --output text)
+          echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
 
-          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
-
-      - name: Wait for deployment
+      - name: Wait for deployment to succeed
         run: |
-          aws deploy wait deployment-successful --deployment-id ${{ env.deployment_id }}
+          aws deploy wait deployment-successful --deployment-id $DEPLOYMENT_ID
