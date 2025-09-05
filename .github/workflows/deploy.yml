@@ -105,7 +105,7 @@ jobs:
             --application-name Ec2NodeApiApp \
             --deployment-group-name Ec2NodeApiDg \
             --deployment-config-name CodeDeployDefault.HalfAtATime \
-            --s3-location bucket=$BUCKET,key=$KEY,bundleType=zip \
+            --s3-location "bucket=$BUCKET,key=$KEY,bundleType=zip" \
             --query "deploymentId" \
             --output text)
           echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
