@@ -28,3 +28,4 @@ Thumbs.db
 .idea/
 *.swp
 ec2-keypair.pem
+test-api.sh

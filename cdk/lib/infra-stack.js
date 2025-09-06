@@ -44,6 +44,13 @@ class InfraStack extends cdk.Stack {
       generateSecret: false
     });
 
+    const userPoolDomain = new cognito.UserPoolDomain(this, "UserPoolDomain", {
+      userPool,
+      cognitoDomain: {
+        domainPrefix: "ec2-api-" + this.account // must be globally unique
+      }
+    });
+
     // VPC
     const vpc = new ec2.Vpc(this, "Vpc", { maxAzs: 2 });
 
@@ -148,7 +155,32 @@ class InfraStack extends cdk.Stack {
     });
 
     const listener = alb.addListener("Http", { port: 80, open: true });
-    listener.addTargetGroups("Forward", { targetGroups: [targetGroup] });
+
+    // listener.addTargetGroups("Forward", { targetGroups: [targetGroup] });
+
+    // Rule 1: Public health check (priority 1, no auth)
+    listener.addTargets("HealthCheck", {
+      priority: 1,
+      conditions: [elbv2.ListenerCondition.pathPatterns(["/health"])],
+      port: 3000,
+      targets: [autoScalingGroup],
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      healthCheck: {
+        path: "/health",
+        healthyHttpCodes: "200",
+      },
+    });
+
+    // Rule 2: Default = authenticate with Cognito, then forward
+    listener.addAction("DefaultAuth", {
+      action: elbv2.ListenerAction.authenticateCognito({
+        userPool,
+        userPoolClient,
+        userPoolDomain,
+      }).next(
+        elbv2.ListenerAction.forward([targetGroup]) // secured traffic
+      ),
+    });
 
     // CodeDeploy app & group (in-place rolling with ALB)
     const cdApp = new codedeploy.ServerApplication(this, "CdApp", {
