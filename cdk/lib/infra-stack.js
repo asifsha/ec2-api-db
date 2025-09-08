@@ -93,6 +93,13 @@ class InfraStack extends cdk.Stack {
       roles: [role.roleName]
     });
 
+    // ALB + Target Group
+    const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
+      vpc,
+      internetFacing: true,
+      securityGroup: albSg
+    });
+
     const certificate = new acm.Certificate(this, "AlbCert", {
       domainName: alb.loadBalancerDnsName,  // must be in Route53 or validated
       validation: acm.CertificateValidation.fromDns(),
@@ -104,12 +111,7 @@ class InfraStack extends cdk.Stack {
       open: true,
     });
 
-    // ALB + Target Group
-    const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
-      vpc,
-      internetFacing: true,
-      securityGroup: albSg
-    });
+    
 
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
