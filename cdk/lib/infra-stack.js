@@ -2,6 +2,8 @@ const cdk = require("aws-cdk-lib");
 const ec2 = require("aws-cdk-lib/aws-ec2");
 const asg = require("aws-cdk-lib/aws-autoscaling");
 const elbv2 = require("aws-cdk-lib/aws-elasticloadbalancingv2");
+const elbv2Actions = require('aws-cdk-lib/aws-elasticloadbalancingv2-actions');
+
 const iam = require("aws-cdk-lib/aws-iam");
 const dynamodb = require("aws-cdk-lib/aws-dynamodb");
 const cognito = require("aws-cdk-lib/aws-cognito");
@@ -157,14 +159,16 @@ class InfraStack extends cdk.Stack {
     const listener = alb.addListener("Http", { port: 80, open: true });
 
     listener.addAction("DefaultAuth", {
-      action: elbv2.ListenerAction.authenticateCognito({
+      action: new elbv2Actions.AuthenticateCognitoAction({
         userPool,
         userPoolClient,
         userPoolDomain,
-      }).next(
-        elbv2.ListenerAction.forward([targetGroup])
-      ),
+        next: elbv2.ListenerAction.forward([targetGroup]) // ✅ specify the "next" inside props
+      }),
     });
+
+    // console.log(Object.keys(require("aws-cdk-lib/aws-elasticloadbalancingv2").ListenerAction));
+
 
     // const listener = alb.addListener("Http", { port: 80, open: true });
 
