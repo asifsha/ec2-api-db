@@ -92,6 +92,17 @@ class InfraStack extends cdk.Stack {
       roles: [role.roleName]
     });
 
+    const certificate = new acm.Certificate(this, "AlbCert", {
+      domainName: alb.loadBalancerDnsName,  // must be in Route53 or validated
+      validation: acm.CertificateValidation.fromDns(),
+    });
+
+    const listener = alb.addListener("Https", {
+      port: 443,
+      certificates: [certificate],
+      open: true,
+    });
+
     // ALB + Target Group
     const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
       vpc,
@@ -102,12 +113,12 @@ class InfraStack extends cdk.Stack {
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
       userPool,
-      generateSecret: true, // required for ALB integration
+      generateSecret: true,
       oAuth: {
         flows: { authorizationCodeGrant: true },
         scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
-        callbackUrls: [`http://${alb.loadBalancerDnsName}/oauth2/idpresponse`], // ALB callback
-        logoutUrls: [`http://${alb.loadBalancerDnsName}/logout`],
+        callbackUrls: ["https://app.example.com/oauth2/idpresponse"], // ✅ must be https
+        logoutUrls: ["https://app.example.com/logout"],
       },
     });
 
@@ -157,7 +168,7 @@ class InfraStack extends cdk.Stack {
       targetUtilizationPercent: 70
     });
 
-    
+
 
     const targetGroup = new elbv2.ApplicationTargetGroup(this, "Tg", {
       vpc,
@@ -167,7 +178,7 @@ class InfraStack extends cdk.Stack {
       healthCheck: { path: "/health", healthyHttpCodes: "200" }
     });
 
-    const listener = alb.addListener("Http", { port: 80, open: true });
+    // const listener = alb.addListener("Http", { port: 80, open: true });
 
     listener.addAction("DefaultAuth", {
       action: new elbv2Actions.AuthenticateCognitoAction({
