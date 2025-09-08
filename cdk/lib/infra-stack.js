@@ -10,6 +10,7 @@ const cognito = require("aws-cdk-lib/aws-cognito");
 const codedeploy = require("aws-cdk-lib/aws-codedeploy");
 const s3 = require("aws-cdk-lib/aws-s3");
 const { Construct } = require("constructs");
+const acm = require("aws-cdk-lib/aws-certificatemanager");
 
 class InfraStack extends cdk.Stack {
   /**
