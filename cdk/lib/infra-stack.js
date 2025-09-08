@@ -92,6 +92,25 @@ class InfraStack extends cdk.Stack {
       roles: [role.roleName]
     });
 
+    // ALB + Target Group
+    const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
+      vpc,
+      internetFacing: true,
+      securityGroup: albSg
+    });
+
+
+    const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
+      userPool,
+      generateSecret: true, // required for ALB integration
+      oAuth: {
+        flows: { authorizationCodeGrant: true },
+        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
+        callbackUrls: [`http://${alb.loadBalancerDnsName}/oauth2/idpresponse`], // ALB callback
+        logoutUrls: [`http://${alb.loadBalancerDnsName}/logout`],
+      },
+    });
+
     // User data: install CodeDeploy agent, Node.js, seed env
     // User data: install CodeDeploy agent, Node.js, seed env
     const userData = ec2.UserData.forLinux();
@@ -138,24 +157,7 @@ class InfraStack extends cdk.Stack {
       targetUtilizationPercent: 70
     });
 
-    // ALB + Target Group
-    const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
-      vpc,
-      internetFacing: true,
-      securityGroup: albSg
-    });
-
-
-    const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
-      userPool,
-      generateSecret: true, // required for ALB integration
-      oAuth: {
-        flows: { authorizationCodeGrant: true },
-        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
-        callbackUrls: [`http://${alb.loadBalancerDnsName}/oauth2/idpresponse`], // ALB callback
-        logoutUrls: [`http://${alb.loadBalancerDnsName}/logout`],
-      },
-    });
+    
 
     const targetGroup = new elbv2.ApplicationTargetGroup(this, "Tg", {
       vpc,
