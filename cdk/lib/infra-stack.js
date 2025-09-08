@@ -47,7 +47,7 @@ class InfraStack extends cdk.Stack {
     const userPoolDomain = new cognito.UserPoolDomain(this, "UserPoolDomain", {
       userPool,
       cognitoDomain: {
-        domainPrefix: "ec2-api-" + this.account // must be globally unique
+        domainPrefix: `ec2app${this.account.substring(0, 6)}`, // keep it short & unique
       }
     });
 
