@@ -41,16 +41,7 @@ class InfraStack extends cdk.Stack {
       signInAliases: { email: true },
       autoVerify: { email: true }
     });
-    const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
-      userPool,
-      generateSecret: true, // required for ALB integration
-      oAuth: {
-        flows: { authorizationCodeGrant: true },
-        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
-        callbackUrls: [`http://${alb.loadBalancerDnsName}/oauth2/idpresponse`], // ALB callback
-        logoutUrls: [`http://${alb.loadBalancerDnsName}/logout`],
-      },
-    });
+
 
     const userPoolDomain = new cognito.UserPoolDomain(this, "UserPoolDomain", {
       userPool,
@@ -152,6 +143,18 @@ class InfraStack extends cdk.Stack {
       vpc,
       internetFacing: true,
       securityGroup: albSg
+    });
+
+
+    const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
+      userPool,
+      generateSecret: true, // required for ALB integration
+      oAuth: {
+        flows: { authorizationCodeGrant: true },
+        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
+        callbackUrls: [`http://${alb.loadBalancerDnsName}/oauth2/idpresponse`], // ALB callback
+        logoutUrls: [`http://${alb.loadBalancerDnsName}/logout`],
+      },
     });
 
     const targetGroup = new elbv2.ApplicationTargetGroup(this, "Tg", {
