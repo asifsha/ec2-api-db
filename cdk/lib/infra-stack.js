@@ -108,10 +108,7 @@ class InfraStack extends cdk.Stack {
     const listener = alb.addListener("Http", { port: 80, open: true });
 
 
-    listener.addTargetGroups("Forward", { 
-  targetGroups: [targetGroup] 
-});
-
+    
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
       userPool,
@@ -178,6 +175,10 @@ class InfraStack extends cdk.Stack {
       port: 3000,
       protocol: elbv2.ApplicationProtocol.HTTP,
       healthCheck: { path: "/health", healthyHttpCodes: "200" }
+    });
+
+    listener.addTargetGroups("Forward", {
+      targetGroups: [targetGroup]
     });
 
     // const listener = alb.addListener("Http", { port: 80, open: true });
