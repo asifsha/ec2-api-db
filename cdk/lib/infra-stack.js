@@ -87,7 +87,7 @@ class InfraStack extends cdk.Stack {
       principals: [new iam.ArnPrincipal(role.roleArn)]
     }));
 
-    table.grantWriteData(role);
+    table.grantReadWriteData(role);
 
     const instanceProfile = new iam.CfnInstanceProfile(this, "InstanceProfile", {
       roles: [role.roleName]
