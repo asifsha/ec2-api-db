@@ -68,14 +68,7 @@ class InfraStack extends cdk.Stack {
     role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
     );
-    // role.addManagedPolicy(
-    //   iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforAWSCodeDeployLimited")
-    // );
-
-
-    // CodeDeploy permissions (broad for sample; narrow in prod)
-    // role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCodeDeployFullAccess"));
-
+    
     artifactBucket.grantReadWrite(role);
 
     artifactBucket.addToResourcePolicy(new iam.PolicyStatement({
@@ -100,10 +93,8 @@ class InfraStack extends cdk.Stack {
       securityGroup: albSg
     });
 
-    // const certificate = new acm.Certificate(this, "AlbCert", {
-    //   domainName: 'https://504e6b6e.test-4xd.pages.dev/',  // must be in Route53 or validated
-    //   validation: acm.CertificateValidation.fromDns(),
-    // });
+    
+
 
     const listener = alb.addListener("Http", { port: 80, open: true });
 
@@ -181,48 +172,7 @@ class InfraStack extends cdk.Stack {
       targetGroups: [targetGroup]
     });
 
-    // const listener = alb.addListener("Http", { port: 80, open: true });
-
-    // listener.addAction("DefaultAuth", {
-    //   action: new elbv2Actions.AuthenticateCognitoAction({
-    //     userPool,
-    //     userPoolClient,
-    //     userPoolDomain,
-    //     next: elbv2.ListenerAction.forward([targetGroup]) // ✅ specify the "next" inside props
-    //   }),
-    // });
-
-    // console.log(Object.keys(require("aws-cdk-lib/aws-elasticloadbalancingv2").ListenerAction));
-
-
-    // const listener = alb.addListener("Http", { port: 80, open: true });
-
-    // listener.addTargetGroups("Forward", { targetGroups: [targetGroup] });
-
-    // Rule 1: Public health check (priority 1, no auth)
-    // listener.addTargets("HealthCheck", {
-    //   priority: 1,
-    //   conditions: [elbv2.ListenerCondition.pathPatterns(["/health"])],
-    //   port: 3000,
-    //   targets: [autoScalingGroup],
-    //   protocol: elbv2.ApplicationProtocol.HTTP,
-    //   healthCheck: {
-    //     path: "/health",
-    //     healthyHttpCodes: "200",
-    //   },
-    // });
-
-    // Rule 2: Default = authenticate with Cognito, then forward
-    // listener.addAction("DefaultAuth", {
-    //   action: elbv2.ListenerAction.authenticateCognito({
-    //     userPool,
-    //     userPoolClient,
-    //     userPoolDomain,
-    //   }).next(
-    //     elbv2.ListenerAction.forward([targetGroup]) // secured traffic
-    //   ),
-    // });
-
+   
     // CodeDeploy app & group (in-place rolling with ALB)
     const cdApp = new codedeploy.ServerApplication(this, "CdApp", {
       applicationName: "Ec2NodeApiApp"
