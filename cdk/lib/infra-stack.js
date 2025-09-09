@@ -101,7 +101,7 @@ class InfraStack extends cdk.Stack {
     });
 
     const certificate = new acm.Certificate(this, "AlbCert", {
-      domainName: 'https://github.com/asifsha/ec2-api-db',  // must be in Route53 or validated
+      domainName: 'github.com/asifsha/ec2-api-db',  // must be in Route53 or validated
       validation: acm.CertificateValidation.fromDns(),
     });
 
