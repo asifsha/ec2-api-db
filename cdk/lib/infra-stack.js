@@ -100,18 +100,17 @@ class InfraStack extends cdk.Stack {
       securityGroup: albSg
     });
 
-    const certificate = new acm.Certificate(this, "AlbCert", {
-      domainName: 'https://504e6b6e.test-4xd.pages.dev/',  // must be in Route53 or validated
-      validation: acm.CertificateValidation.fromDns(),
-    });
+    // const certificate = new acm.Certificate(this, "AlbCert", {
+    //   domainName: 'https://504e6b6e.test-4xd.pages.dev/',  // must be in Route53 or validated
+    //   validation: acm.CertificateValidation.fromDns(),
+    // });
 
-    const listener = alb.addListener("Https", {
-      port: 443,
-      certificates: [certificate],
-      open: true,
-    });
+    const listener = alb.addListener("Http", { port: 80, open: true });
 
-    
+
+    listener.addTargetGroups("Forward", { 
+  targetGroups: [targetGroup] 
+});
 
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
@@ -183,14 +182,14 @@ class InfraStack extends cdk.Stack {
 
     // const listener = alb.addListener("Http", { port: 80, open: true });
 
-    listener.addAction("DefaultAuth", {
-      action: new elbv2Actions.AuthenticateCognitoAction({
-        userPool,
-        userPoolClient,
-        userPoolDomain,
-        next: elbv2.ListenerAction.forward([targetGroup]) // ✅ specify the "next" inside props
-      }),
-    });
+    // listener.addAction("DefaultAuth", {
+    //   action: new elbv2Actions.AuthenticateCognitoAction({
+    //     userPool,
+    //     userPoolClient,
+    //     userPoolDomain,
+    //     next: elbv2.ListenerAction.forward([targetGroup]) // ✅ specify the "next" inside props
+    //   }),
+    // });
 
     // console.log(Object.keys(require("aws-cdk-lib/aws-elasticloadbalancingv2").ListenerAction));
 
