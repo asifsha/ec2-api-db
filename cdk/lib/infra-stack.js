@@ -100,9 +100,10 @@ class InfraStack extends cdk.Stack {
       securityGroup: albSg
     });
 
-    const certificate = new acm.Certificate(this, "AlbCert", {
-      domainName: 'github.com/asifsha/ec2-api-db',  // must be in Route53 or validated
-      validation: acm.CertificateValidation.fromDns(),
+    const certificate = new acm.DnsValidatedCertificate(this, "AlbCert", {
+      domainName: alb.loadBalancerDnsName,   // use the ALB’s DNS name
+      hostedZone: undefined,                 // no Route53 required
+      region: cdk.Stack.of(this).region,     // cert must be in same region as ALB
     });
 
     const listener = alb.addListener("Https", {
@@ -111,7 +112,7 @@ class InfraStack extends cdk.Stack {
       open: true,
     });
 
-    
+
 
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
