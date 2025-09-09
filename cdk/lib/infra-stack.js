@@ -100,29 +100,25 @@ class InfraStack extends cdk.Stack {
       securityGroup: albSg
     });
 
-    const certificate = new acm.DnsValidatedCertificate(this, "AlbCert", {
-      domainName: alb.loadBalancerDnsName,   // use the ALB’s DNS name
-      hostedZone: undefined,                 // no Route53 required
-      region: cdk.Stack.of(this).region,     // cert must be in same region as ALB
-    });
 
-    const listener = alb.addListener("Https", {
-      port: 443,
-      certificates: [certificate],
-      open: true,
-    });
+
+    // const listener = alb.addListener("Https", {
+    //   port: 443,
+    //   certificates: [certificate],
+    //   open: true,
+    // });
 
 
 
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
       userPool,
-      generateSecret: true,
+      generateSecret: false,
       oAuth: {
         flows: { authorizationCodeGrant: true },
         scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
-        callbackUrls: ["https://app.example.com/oauth2/idpresponse"], // ✅ must be https
-        logoutUrls: ["https://app.example.com/logout"],
+        callbackUrls: [`http://${alb.loadBalancerDnsName}/oauth2/idpresponse`],
+        logoutUrls: [`http://${alb.loadBalancerDnsName}/logout`],
       },
     });
 
@@ -182,7 +178,7 @@ class InfraStack extends cdk.Stack {
       healthCheck: { path: "/health", healthyHttpCodes: "200" }
     });
 
-    // const listener = alb.addListener("Http", { port: 80, open: true });
+    const listener = alb.addListener("Http", { port: 80, open: true });
 
     listener.addAction("DefaultAuth", {
       action: new elbv2Actions.AuthenticateCognitoAction({
