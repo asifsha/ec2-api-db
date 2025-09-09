@@ -47,7 +47,7 @@ class InfraStack extends cdk.Stack {
     const userPoolDomain = new cognito.UserPoolDomain(this, "UserPoolDomain", {
       userPool,
       cognitoDomain: {
-        domainPrefix: `ec2app${this.account.substring(0, 6)}`, // keep it short & unique
+        domainPrefix: `https://github.com/asifsha/ec2-api-db`, // keep it short & unique
       }
     });
 
@@ -101,7 +101,7 @@ class InfraStack extends cdk.Stack {
     });
 
     const certificate = new acm.Certificate(this, "AlbCert", {
-      domainName: alb.loadBalancerDnsName,  // must be in Route53 or validated
+      domainName: 'https://github.com/asifsha/ec2-api-db',  // must be in Route53 or validated
       validation: acm.CertificateValidation.fromDns(),
     });
 
